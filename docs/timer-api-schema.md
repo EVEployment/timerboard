@@ -4,8 +4,8 @@ This app can load timers from an HTTP API snapshot and receive live updates from
 
 ## Environment Variables
 
-- `VITE_TIMERS_API_URL`: HTTP endpoint for initial timer snapshot (`GET` JSON).
-- `VITE_TIMERS_SSE_URL`: SSE endpoint for live timer events (`EventSource`).
+- `PUBLIC_TIMERS_API_URL`: HTTP endpoint for initial timer snapshot (`GET` JSON).
+- `PUBLIC_TIMERS_SSE_URL`: SSE endpoint for live timer events (`EventSource`).
 
 If either variable is missing, that source is skipped.
 

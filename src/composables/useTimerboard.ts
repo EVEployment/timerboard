@@ -13,14 +13,14 @@ import {
 } from '../utils/timer-utils';
 
 const TIMER_DATA_KEY = 'timerboardTimersV4';
-const TIMER_API_URL = import.meta.env.VITE_TIMERS_API_URL?.trim() ?? '';
-const TIMER_SSE_URL = import.meta.env.VITE_TIMERS_SSE_URL?.trim() ?? '';
+const TIMER_API_URL = import.meta.env.PUBLIC_TIMERS_API_URL?.trim() ?? '';
+const TIMER_SSE_URL = import.meta.env.PUBLIC_TIMERS_SSE_URL?.trim() ?? '';
 const TIMER_POLL_MS = (() => {
-  const raw = import.meta.env.VITE_TIMERS_POLL_MS ?? import.meta.env.VITE_TIMERS_POLL_INTERVAL_MS ?? '';
+  const raw = import.meta.env.PUBLIC_TIMERS_POLL_MS ?? import.meta.env.PUBLIC_TIMERS_POLL_INTERVAL_MS ?? '';
   const n = Number.parseInt(String(raw), 10);
   return Number.isFinite(n) && n > 0 ? n : 5 * 60 * 1000; // default 5 minutes
 })();
-const DISABLE_PASTE = Boolean(import.meta.env.VITE_DISABLE_PASTE_TIMERS);
+const DISABLE_PASTE = Boolean(import.meta.env.PUBLIC_DISABLE_PASTE_TIMERS);
 
 type TimerSnapshotPayload = {
   timers?: Partial<Timer>[];

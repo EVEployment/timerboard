@@ -23,8 +23,8 @@ The app can optionally load timers from an API snapshot and subscribe to live up
 Set environment variables:
 
 ```bash
-VITE_TIMERS_API_URL=https://your-api.example.com/timers
-VITE_TIMERS_SSE_URL=https://your-api.example.com/timers/stream
+PUBLIC_TIMERS_API_URL=https://your-api.example.com/timers
+PUBLIC_TIMERS_SSE_URL=https://your-api.example.com/timers/stream
 ```
 
 Schema and event formats are documented in `docs/timer-api-schema.md`.
