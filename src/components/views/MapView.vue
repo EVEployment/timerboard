@@ -1133,7 +1133,7 @@ watch(universePanBounds, () => {
                 :x="regionTopology.positions[system]?.[0] ?? 0"
                 :y="(regionTopology.positions[system]?.[1] ?? 0) + systemRadius(system) + 10"
                 text-anchor="middle"
-                :fill="isLightColor(systemNodeColor(system)) ? 'rgba(0,0,0,0.9)' : 'var(--text-3)'"
+                fill="var(--text-3)"
                 font-size="8"
                 pointer-events="none"
               >
