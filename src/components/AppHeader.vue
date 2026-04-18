@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { TimerView } from '../types/timer';
 import { useRouter } from 'vue-router';
+import { computed } from 'vue';
+import { useTimerboard } from '../composables/useTimerboard';
 
 defineProps<{
   currentView: TimerView;
@@ -13,6 +15,21 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const store = useTimerboard();
+
+const showApiRefresh = computed(() => store.hasApi && !store.hasSse);
+const nextRefreshMs = computed(() => {
+  if (!store.lastFetchMs || !store.pollMs) return 0;
+  const elapsed = store.nowMs - (store.lastFetchMs || 0);
+  const remaining = Math.max(0, store.pollMs - elapsed);
+  return remaining;
+});
+
+function formatMs(ms: number) {
+  const s = Math.ceil(ms / 1000);
+  if (s >= 60) return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  return `${s}s`;
+}
 
 const views: Array<{ id: TimerView; label: string; title: string }> = [
   { id: 'summary', label: 'Summary', title: 'Command summary' },
@@ -60,7 +77,8 @@ void views;
     </nav>
 
     <div class="header-actions">
-      <button class="tool-btn" title="Paste timers from Discord" @click="emit('openImport')">Paste timers</button>
+      <button v-if="showApiRefresh" class="tool-btn" @click="store.manualRefresh()">Refresh ({{ formatMs(nextRefreshMs) }})</button>
+      <button v-if="!store.disablePaste" class="tool-btn" title="Paste timers from Discord" @click="emit('openImport')">Paste timers</button>
       <button class="tool-btn" @click="emit('toggleTheme')">Theme</button>
     </div>
   </header>
@@ -194,6 +212,27 @@ void views;
   .header-nav,
   .header-actions {
     justify-content: flex-start;
+  }
+}
+
+/* Mobile: place brand on left and clock on right on a single row */
+@media (max-width: 720px) {
+  .header-left {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand-copy .title {
+    font-size: 14px;
+  }
+
+  .clock-box {
+    text-align: right;
+    min-width: auto;
+    margin-left: auto;
   }
 }
 

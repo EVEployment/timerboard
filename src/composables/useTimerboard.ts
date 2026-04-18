@@ -21,6 +21,8 @@ const TIMER_POLL_MS = (() => {
   return Number.isFinite(n) && n > 0 ? n : 5 * 60 * 1000; // default 5 minutes
 })();
 const DISABLE_PASTE = Boolean(import.meta.env.PUBLIC_DISABLE_PASTE_TIMERS);
+const HAS_API = Boolean(TIMER_API_URL);
+const HAS_SSE = Boolean(TIMER_SSE_URL);
 
 type TimerSnapshotPayload = {
   timers?: Partial<Timer>[];
@@ -164,18 +166,17 @@ export const useTimerboard = defineStore('timerboard', () => {
       }
 
       const payload = (await response.json()) as TimerSnapshotPayload | Partial<Timer>[];
-      // Debug: surface unexpected payload shapes when no timers are applied
-      if (import.meta.env.MODE !== 'production') {
-        // eslint-disable-next-line no-console
-        console.debug('[useTimerboard] fetchRemoteSnapshot:', { url: TIMER_API_URL, status: response.status, payload });
-      }
+      // Surface returned payload for diagnosis (always log so UI can be used to report issues)
+      // eslint-disable-next-line no-console
+      console.debug('[useTimerboard] fetchRemoteSnapshot:', { url: TIMER_API_URL, status: response.status, payload });
       const extracted = extractTimersPayload(payload);
       if (!Array.isArray(payload) && !extracted.length) {
-        importStatus.value = 'Timer API returned no timers (unexpected payload shape).';
+        importStatus.value = `Timer API returned no timers (payload keys: ${payload && typeof payload === 'object' ? Object.keys(payload).join(',') : typeof payload}).`;
         return;
       }
 
       setTimersFromRemote(Array.isArray(payload) ? payload : extracted);
+      lastFetchMs.value = Date.now();
       importStatus.value = `Synced ${timers.value.length} timer(s) from API.`;
     } catch {
       importStatus.value = 'Failed to load timer API snapshot. Using local timers.';
@@ -236,6 +237,15 @@ export const useTimerboard = defineStore('timerboard', () => {
     if (pollIntervalId) {
       window.clearInterval(pollIntervalId);
       pollIntervalId = 0;
+    }
+  }
+
+  async function manualRefresh() {
+    try {
+      await fetchRemoteSnapshot();
+    } finally {
+      stopPolling();
+      if (!HAS_SSE && HAS_API) startPolling();
     }
   }
 
@@ -449,6 +459,7 @@ export const useTimerboard = defineStore('timerboard', () => {
   });
 
   const authRequired = ref(false);
+  const lastFetchMs = ref<number>(0);
 
   const structureOptions = computed(() => {
     const unique = Array.from(new Set(timers.value.map((timer) => timer.structure)));
@@ -589,5 +600,11 @@ export const useTimerboard = defineStore('timerboard', () => {
     initialize,
     teardown,
     authRequired,
+    disablePaste: DISABLE_PASTE,
+    lastFetchMs,
+    manualRefresh,
+    pollMs: TIMER_POLL_MS,
+    hasApi: HAS_API,
+    hasSse: HAS_SSE,
   };
 });
