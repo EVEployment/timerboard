@@ -455,6 +455,11 @@ function hideMapTooltip() {
   mapTooltip.rows = [];
 }
 
+function returnToUniverse() {
+  selectedRegion.value = null;
+  hideMapTooltip();
+}
+
 function onRegionHover(region: string, event: MouseEvent) {
   const rows = triageTimers.value
     .filter((timer) => timerRegion(timer) === region)
@@ -943,6 +948,21 @@ watch(universePanBounds, () => {
 
     <div class="map-wrap" v-else>
       <div class="map-svg-wrap">
+        <nav class="map-breadcrumb" aria-label="Map navigation">
+          <button
+            class="map-breadcrumb-link"
+            type="button"
+            :aria-current="selectedRegion ? undefined : 'page'"
+            @click="returnToUniverse"
+          >
+            Universe
+          </button>
+          <template v-if="selectedRegion">
+            <span class="map-breadcrumb-separator" aria-hidden="true">/</span>
+            <span class="map-breadcrumb-current" aria-current="page">{{ selectedRegion }}</span>
+          </template>
+        </nav>
+
         <div class="map-legend">
           <div class="map-legend-item" v-for="wave in MAP_WAVES" :key="wave.id">
             <span class="map-wave-dot" :class="wave.cls" /> {{ wave.label }}
@@ -1146,7 +1166,7 @@ watch(universePanBounds, () => {
       <div class="map-sidebar">
         
 
-        <div class="map-region-card universe-card" @click="selectedRegion = null"
+        <div class="map-region-card universe-card" @click="returnToUniverse"
           :class="{active: selectedRegion === null}">
           <div class="map-rc-name">Universe</div>
         </div>
@@ -1270,6 +1290,50 @@ watch(universePanBounds, () => {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.map-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: var(--text-3);
+  font-size: 11px;
+}
+
+.map-breadcrumb-link {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  transition: border-color 0.1s, color 0.1s, background 0.1s;
+}
+
+.map-breadcrumb-link:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-mid);
+  color: var(--text-1);
+}
+
+.map-breadcrumb-link[aria-current='page'] {
+  color: var(--text-1);
+  cursor: default;
+}
+
+.map-breadcrumb-separator {
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+
+.map-breadcrumb-current {
+  color: var(--text-1);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .map-sidebar {
