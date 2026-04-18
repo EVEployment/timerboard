@@ -338,7 +338,12 @@ const regionTopology = computed(() => {
     });
   }
 
-  return { region, systems, edges, positions };
+  const displayPositions: Record<string, [number, number]> = {};
+  for (const [system, pos] of Object.entries(positions)) {
+    displayPositions[system] = [pos[0], REGION_VIEW_HEIGHT - pos[1]];
+  }
+
+  return { region, systems, edges, positions: displayPositions };
 });
 
 function systemTimers(system: string): Timer[] {
