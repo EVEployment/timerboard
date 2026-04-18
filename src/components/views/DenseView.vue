@@ -3,7 +3,6 @@ import type { Timer } from '../../types/timer';
 import {
   countdown,
   countdownClass,
-  eveTimeContext,
   formatLocalDayLabel,
   isVisualMajor,
   localTimeLabel,
@@ -59,7 +58,6 @@ defineProps<{
           </div>
 
           <div class="dense-card-main">
-            <div class="dense-eve-time">{{ eveTimeContext(timer) }}</div>
             <div class="dense-badges">
               <span class="dense-struct">{{ timer.structure }}</span>
               <span class="dense-state" :class="stateKey(timer.state)">{{ timer.state }}</span>
@@ -154,12 +152,6 @@ defineProps<{
 .dense-card-main {
   display: grid;
   gap: 6px;
-}
-
-.dense-eve-time {
-  color: var(--text-3);
-  font-family: var(--font-mono);
-  font-size: 10px;
 }
 
 .dense-star {
