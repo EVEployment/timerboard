@@ -10,6 +10,7 @@ import {
   timerDateTime,
   toUtcClock,
   todayUtcDate,
+  normalizeTimerState,
 } from '../utils/timer-utils';
 
 const TIMER_DATA_KEY = 'timerboardTimersV4';
@@ -84,9 +85,9 @@ export const useTimerboard = defineStore('timerboard', () => {
           name: obj.name ? String(obj.name) : String(obj.title || obj.name || ''),
           structure: obj.structure ? String(obj.structure) : String(obj.type || obj.structure_type || ''),
           state: obj.state ? String(obj.state) : String(obj.stage || obj.state || ''),
-            // Preserve owner_ticker separately and keep status sourced from stance/status
-            status: obj.stance ? String(obj.stance) : String(obj.status || ''),
-            owner: obj.owner_ticker ? String(obj.owner_ticker) : (obj.owner ? String(obj.owner) : ''),
+          // Preserve owner_ticker separately and keep status sourced from stance/status
+          status: obj.stance ? String(obj.stance) : String(obj.status || ''),
+          owner: obj.owner_ticker ? String(obj.owner_ticker) : (obj.owner ? String(obj.owner) : ''),
           region,
         };
       }
@@ -107,9 +108,9 @@ export const useTimerboard = defineStore('timerboard', () => {
               name: obj.name ? String(obj.name) : String(obj.title || obj.name || ''),
               structure: obj.type ? String(obj.type) : String(obj.structure || ''),
               state: obj.stage ? String(obj.stage) : String(obj.state || ''),
-                // Preserve owner_ticker separately and keep status sourced from stance/status
-                status: obj.stance ? String(obj.stance) : String(obj.status || ''),
-                owner: obj.owner_ticker ? String(obj.owner_ticker) : (obj.owner ? String(obj.owner) : ''),
+              // Preserve owner_ticker separately and keep status sourced from stance/status
+              status: obj.stance ? String(obj.stance) : String(obj.status || ''),
+              owner: obj.owner_ticker ? String(obj.owner_ticker) : (obj.owner ? String(obj.owner) : ''),
               region,
             };
           }
@@ -135,11 +136,13 @@ export const useTimerboard = defineStore('timerboard', () => {
       if (String(idVal) === 'Auth' && struct.includes('skyhook')) continue;
       mapped.push(mappedItem);
     }
-    // Deduplicate by system|name|structure|state — keep the earliest timer (by date+time)
-    const deduped = new Map<string, Partial<Timer>>();
-    const normalizeKey = (s: unknown) =>
-      (typeof s === 'string' ? s : String(s ?? '')).toLowerCase().replace(/\s+/g, ' ').trim();
+    // Normalize state values and deduplicate by normalized system|name|structure|state — keep earliest timer
+    const normalizeKey = (s: unknown) => (typeof s === 'string' ? s : String(s ?? '')).toLowerCase().replace(/\s+/g, ' ').trim();
+    for (const it of mapped) {
+      if (it.state) it.state = normalizeTimerState(it.state);
+    }
 
+    const deduped = new Map<string, Partial<Timer>>();
     for (const item of mapped) {
       const key = `${normalizeKey(item.system)}|${normalizeKey(item.name)}|${normalizeKey(item.structure)}|${normalizeKey(item.state)}`;
       const existing = deduped.get(key);
@@ -456,7 +459,7 @@ export const useTimerboard = defineStore('timerboard', () => {
     toggleArrayFilter(filters.side, value);
   }
 
-  function toggleState(value: 'Final' | 'Armor' | 'Anchoring') {
+  function toggleState(value: 'Hull' | 'Armor' | 'Anchoring') {
     toggleArrayFilter(filters.state, value);
   }
 
@@ -494,9 +497,9 @@ export const useTimerboard = defineStore('timerboard', () => {
     filters.hiddenStructures = [];
   }
 
-  function stateBucket(state: string): 'Final' | 'Armor' | 'Anchoring' {
+  function stateBucket(state: string): 'Hull' | 'Armor' | 'Anchoring' {
     const key = stateKey(state);
-    if (key === 'final') return 'Final';
+    if (key === 'hull') return 'Hull';
     if (key === 'armor') return 'Armor';
     return 'Anchoring';
   }

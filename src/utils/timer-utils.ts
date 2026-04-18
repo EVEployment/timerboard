@@ -122,14 +122,14 @@ function cleanText(value: unknown, maxLen: number): string {
     .slice(0, maxLen);
 }
 
-function normalizeTimerState(value: unknown): string {
+export function normalizeTimerState(value: unknown): string {
   const cleaned = cleanText(value, TIMER_TEXT_LIMITS.state);
   const key = stateKey(cleaned);
   if (key === 'final') return 'Hull';
   if (key === 'armor') return 'Armor';
   if (key === 'anchor') return 'Anchoring';
   if (key === 'hull') return 'Hull';
-  return cleaned ? `${cleaned.charAt(0).toUpperCase()}${cleaned.slice(1).toLowerCase()}` : 'Final';
+  return cleaned ? `${cleaned.charAt(0).toUpperCase()}${cleaned.slice(1).toLowerCase()}` : 'Hull';
 }
 
 function normalizeTimerStatus(value: unknown): 'Friendly' | 'Hostile' {

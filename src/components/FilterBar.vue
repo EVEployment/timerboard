@@ -4,7 +4,7 @@ import type { FilterState } from '../types/timer';
 import { ref } from 'vue';
 
 const SIDE_OPTIONS = ['Friendly', 'Hostile'] as const;
-const STATE_OPTIONS = ['Final', 'Armor', 'Anchoring'] as const;
+const STATE_OPTIONS = ['Hull', 'Armor', 'Anchoring'] as const;
 
 defineProps<{
   filters: FilterState;
@@ -17,7 +17,7 @@ const emit = defineEmits<{
   resetFilters: [];
   toggleMajor: [];
   toggleSide: [value: 'Friendly' | 'Hostile'];
-  toggleState: [value: 'Final' | 'Armor' | 'Anchoring'];
+  toggleState: [value: 'Hull' | 'Armor' | 'Anchoring'];
   toggleRegion: [region: string];
   setStructureVisibility: [structure: string, visible: boolean];
 }>();

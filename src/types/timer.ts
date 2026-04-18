@@ -1,4 +1,4 @@
-export type TimerState = 'Final' | 'Armor' | 'Anchoring' | 'Hull' | string;
+export type TimerState = 'Hull' | 'Armor' | 'Anchoring' | 'Hull' | string;
 export type TimerStatus = 'Friendly' | 'Hostile';
 
 export interface Timer {
@@ -19,7 +19,7 @@ export type TimerView = 'summary' | 'table' | 'dense' | 'gantt' | 'map';
 
 export interface FilterState {
   side: TimerStatus[];
-  state: Array<'Final' | 'Armor' | 'Anchoring'>;
+  state: Array<'Hull' | 'Armor' | 'Anchoring'>;
   major: boolean;
   regions: string[];
   hiddenStructures: string[];
