@@ -11,6 +11,7 @@ import {
   toUtcClock,
   todayUtcDate,
   normalizeTimerState,
+  normalizeStructureName,
 } from '../utils/timer-utils';
 
 const TIMER_DATA_KEY = 'timerboardTimersV4';
@@ -148,7 +149,7 @@ export const useTimerboard = defineStore('timerboard', () => {
     const SEAT_PRIORITY_WINDOW_MS = 2 * 60 * 1000; // 2 minutes
     for (const item of mapped) {
       // Deduplicate across states: base key excludes `state` so we can prefer SeAT when needed
-      const key = `${normalizeKey(item.system)}|${normalizeKey(item.name)}|${normalizeKey(item.structure)}`;
+      const key = `${normalizeKey(item.system)}|${normalizeKey(item.name)}|${normalizeStructureName(normalizeKey(item.structure))}`;
       const existing = deduped.get(key);
       if (!existing) {
         deduped.set(key, item);
