@@ -221,6 +221,7 @@ export const useTimerboard = defineStore('timerboard', () => {
       console.debug('[useTimerboard] fetchRemoteSnapshot:', { url: TIMER_API_URL, status: response.status, payload });
       const extracted = extractTimersPayload(payload);
       if (!Array.isArray(payload) && !extracted.length) {
+        console.debug('[useTimerboard] fetchRemoteSnapshot: No timers extracted from payload', { payload });
         importStatus.value = `Timer API returned no timers (payload keys: ${payload && typeof payload === 'object' ? Object.keys(payload).join(',') : typeof payload}).`;
         return;
       }
