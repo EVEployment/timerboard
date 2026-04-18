@@ -75,15 +75,17 @@ export const useTimerboard = defineStore('timerboard', () => {
 
       // If already has date/time keys, prefer them
       if (obj.date && obj.time) {
+        const sys = obj.system ? String(obj.system) : String(obj.system_name || obj.systemName || obj.system || '');
+        const region = obj.region ? String(obj.region) : (typeof sys === 'string' && sys ? (SYSTEM_REGION_LOOKUP[sys] || '') : '');
         return {
           date: String(obj.date),
           time: String(obj.time),
-          system: obj.system ? String(obj.system) : String(obj.system_name || obj.systemName || obj.system || ''),
+          system: sys,
           name: obj.name ? String(obj.name) : String(obj.title || obj.name || ''),
           structure: obj.structure ? String(obj.structure) : String(obj.type || obj.structure_type || ''),
           state: obj.state ? String(obj.state) : String(obj.stage || obj.state || ''),
           status: obj.status ? String(obj.status) : String(obj.stance || obj.status || ''),
-          region: obj.region ? String(obj.region) : String(obj.region_name || obj.region || ''),
+          region,
         };
       }
 
@@ -94,15 +96,17 @@ export const useTimerboard = defineStore('timerboard', () => {
           if (!Number.isNaN(d.getTime())) {
             const date = d.toISOString().slice(0, 10);
             const time = d.toISOString().slice(11, 16);
+            const sys = obj.system ? String(obj.system) : String(obj.system_name || obj.systemName || '');
+            const region = obj.region ? String(obj.region) : (sys ? (SYSTEM_REGION_LOOKUP[sys] || '') : '');
             return {
               date,
               time,
-              system: obj.system ? String(obj.system) : String(obj.system_name || obj.systemName || ''),
+              system: sys,
               name: obj.name ? String(obj.name) : String(obj.title || obj.name || ''),
               structure: obj.type ? String(obj.type) : String(obj.structure || ''),
               state: obj.stage ? String(obj.stage) : String(obj.state || ''),
               status: obj.stance ? String(obj.stance) : String(obj.status || ''),
-              region: obj.region ? String(obj.region) : String(obj.region_name || ''),
+              region,
             };
           }
         } catch {
@@ -120,7 +124,12 @@ export const useTimerboard = defineStore('timerboard', () => {
     const mapped: Partial<Timer>[] = [];
     for (const item of rawList as any[]) {
       const mappedItem = mapApiTimer(item);
-      if (mappedItem) mapped.push(mappedItem);
+      if (!mappedItem) continue;
+      // Ad-hoc rule: discard Orbital Skyhook entries when item.id === 'Auth'
+      const idVal = item?.id ?? '';
+      const struct = (mappedItem.structure || '').toLowerCase();
+      if (String(idVal) === 'Auth' && struct.includes('skyhook')) continue;
+      mapped.push(mappedItem);
     }
     return mapped;
   }
