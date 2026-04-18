@@ -90,8 +90,12 @@ export function normalizeStructureName(raw: string): string {
     ['skyhook', 'Orbital Skyhook'],
     ['astra', 'Astrahus'],
     ['ansi', 'Ansiblex Jump Bridge'],
-    ['ihub', 'IHub'],
+    ['ihub', 'Infrastructure Hub'],
+    ['infrastructure hub', 'Infrastructure Hub'],
+    ['i-hub', 'Infrastructure Hub'],
     ['tcu', 'TCU'],
+    ['fortizar', 'Fortizar'],
+
   ];
 
   const found = table.find(([needle]) => lower.includes(needle));
@@ -156,6 +160,7 @@ export function sanitizeTimer(raw: Partial<Timer>): Timer | null {
     structure: normalizeStructureName(cleanText(raw.structure || 'Unknown', TIMER_TEXT_LIMITS.structure)),
     state: normalizeTimerState(raw.state),
     status: normalizeTimerStatus(raw.status),
+    owner: cleanText((raw as any).owner || (raw as any).owner_ticker || '', TIMER_TEXT_LIMITS.tag),
     countdown: cleanText(raw.countdown, TIMER_TEXT_LIMITS.countdown),
     tag: cleanText(raw.tag, TIMER_TEXT_LIMITS.tag),
   };

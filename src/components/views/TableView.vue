@@ -74,7 +74,16 @@ function structureClass(structure: string): string {
                   <span class="struct-badge" :class="structureClass(timer.structure)">{{ timer.structure }}</span>
               </td>
               <td><span class="state-badge" :class="stateKey(timer.state)">{{ timer.state }}</span></td>
-              <td><span class="status-dot" :class="timer.status === 'Friendly' ? 'ours' : 'theirs'">{{ timer.status === 'Friendly' ? 'Ours' : 'Theirs' }}</span></td>
+              <td>
+                <span
+                  class="status-dot"
+                  :class="timer.status === 'Friendly' ? 'ours' : 'theirs'"
+                  :title="timer.owner ? `${timer.status} — ${timer.owner}` : timer.status"
+                >
+                  {{ timer.status === 'Friendly' ? 'Ours' : 'Theirs' }}
+                  <span v-if="timer.owner"> ({{ timer.owner }})</span>
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>

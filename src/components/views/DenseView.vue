@@ -34,7 +34,13 @@ defineProps<{
             </div>
             <div class="dense-card-side">
               <span class="dense-star">{{ isVisualMajor(timer) ? '★' : '' }}</span>
-              <span class="dense-owner" :class="timer.status === 'Friendly' ? 'ours' : 'theirs'" />
+              <span
+                class="dense-owner"
+                :class="timer.status === 'Friendly' ? 'ours' : 'theirs'"
+                :title="timer.owner ? `Owner: ${timer.owner}` : (timer.status || '')"
+              >
+                <template v-if="timer.owner">{{ timer.owner }}</template>
+              </span>
               <span class="dense-cd" :class="countdownClass(timerDateTime(timer).getTime() - nowMs)">
                 {{ timerDateTime(timer).getTime() <= nowMs ? 'elapsed' : countdown(timerDateTime(timer).getTime() - nowMs) }}
               </span>

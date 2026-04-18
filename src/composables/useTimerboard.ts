@@ -84,7 +84,9 @@ export const useTimerboard = defineStore('timerboard', () => {
           name: obj.name ? String(obj.name) : String(obj.title || obj.name || ''),
           structure: obj.structure ? String(obj.structure) : String(obj.type || obj.structure_type || ''),
           state: obj.state ? String(obj.state) : String(obj.stage || obj.state || ''),
-          status: obj.status ? String(obj.status) : String(obj.stance || obj.status || ''),
+            // Preserve owner_ticker separately and keep status sourced from stance/status
+            status: obj.stance ? String(obj.stance) : String(obj.status || ''),
+            owner: obj.owner_ticker ? String(obj.owner_ticker) : (obj.owner ? String(obj.owner) : ''),
           region,
         };
       }
@@ -105,7 +107,9 @@ export const useTimerboard = defineStore('timerboard', () => {
               name: obj.name ? String(obj.name) : String(obj.title || obj.name || ''),
               structure: obj.type ? String(obj.type) : String(obj.structure || ''),
               state: obj.stage ? String(obj.stage) : String(obj.state || ''),
-              status: obj.stance ? String(obj.stance) : String(obj.status || ''),
+                // Preserve owner_ticker separately and keep status sourced from stance/status
+                status: obj.stance ? String(obj.stance) : String(obj.status || ''),
+                owner: obj.owner_ticker ? String(obj.owner_ticker) : (obj.owner ? String(obj.owner) : ''),
               region,
             };
           }

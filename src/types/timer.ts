@@ -9,6 +9,7 @@ export interface Timer {
   structure: string;
   state: TimerState;
   status: TimerStatus;
+  owner?: string;
   region: string;
   countdown?: string;
   tag?: string;

@@ -443,6 +443,7 @@ function onRegionHover(region: string, event: MouseEvent) {
         id: `${region}-${timer.system}-${timer.time}-${index}`,
         status: timer.status,
         name: timer.name,
+        owner: (timer as any).owner || '',
         structure: timer.structure,
         state: timer.state,
         countdown: tooltipCountdown(ms),
@@ -463,6 +464,7 @@ function onSystemHover(system: string, event: MouseEvent) {
       return {
         id: `${system}-${timer.time}-${index}`,
         status: timer.status,
+        owner: (timer as any).owner || '',
         name: timer.name,
         structure: timer.structure,
         state: timer.state,
@@ -1143,8 +1145,11 @@ watch(universePanBounds, () => {
                 <div class="map-action-meta">{{ selectedRegion ? item.timers[0]?.structure : `${item.region} - ${item.timers[0]?.structure}` }}</div>
               </div>
               <div>
-                <div class="map-action-time">
-                  {{ item.timers[0]?.time }} · {{ tooltipCountdown(item.earliestMs - props.nowMs) }}
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span class="status-dot" :class="item.timers[0]?.status === 'Friendly' ? 'ours' : 'theirs'" :title="item.timers[0]?.owner ? `${item.timers[0].status} — ${item.timers[0].owner}` : item.timers[0]?.status" />
+                  <div class="map-action-time">
+                    {{ item.timers[0]?.time }} · {{ tooltipCountdown(item.earliestMs - props.nowMs) }}
+                  </div>
                 </div>
                 <div class="map-action-count">{{ item.timers.length }} timers</div>
               </div>
@@ -1164,9 +1169,9 @@ watch(universePanBounds, () => {
           <span>No active timers</span>
         </div>
         <div v-for="row in mapTooltip.rows" :key="row.id" class="mst-row">
-          <span class="mst-dot" :class="row.status === 'Hostile' ? 'hostile' : 'friendly'" />
+          <span class="mst-dot" :class="row.status === 'Hostile' ? 'hostile' : 'friendly'" :title="row.status" />
           <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;">
-            <span class="mst-name" style="font-weight:700;">{{ row.name || row.structure }}</span>
+            <span class="mst-name" style="font-weight:700;">{{ row.name }}<span v-if="row.owner"> ({{ row.owner }})</span></span>
             <span class="mst-struct" style="font-size:12px;color:var(--text-3);">{{ row.structure }} · {{ row.state }}</span>
           </div>
           <span class="mst-cd" :class="row.countdownCls">{{ row.countdown }}</span>
@@ -1410,7 +1415,7 @@ watch(universePanBounds, () => {
   min-width: 0;
 }
 
-.map-action-sys {
+    .map-action-row {
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--blue);
@@ -1420,6 +1425,14 @@ watch(universePanBounds, () => {
 }
 
 .map-action-meta {
+
+    .map-action-row .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
   color: var(--text-3);
   font-size: 10px;
   white-space: nowrap;

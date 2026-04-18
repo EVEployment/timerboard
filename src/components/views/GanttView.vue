@@ -91,7 +91,10 @@ function leftForTime(time: string): number {
                 :style="{ left: `${leftForTime(timer.time)}px` }"
                 :title="`${timer.time} UTC - ${timer.system} - ${timer.name} (${timer.structure})`"
               >
-                <span class="tl-pill-text">{{ isVisualMajor(timer) ? '★ ' : '' }}{{ timer.system }} - {{ timer.name }} · {{ timer.structure }}</span>
+                <span class="tl-pill-text">
+                  {{ isVisualMajor(timer) ? '★ ' : '' }}{{ timer.system }} - {{ timer.name }} · {{ timer.structure }}
+                  <template v-if="(timer as any).owner"> ({{ (timer as any).owner }})</template>
+                </span>
               </div>
             </div>
           </div>
