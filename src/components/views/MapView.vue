@@ -1,18 +1,31 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
+import { useTranslation } from 'i18next-vue';
 import { computed, reactive, ref, watch } from 'vue';
 import {
   MAP_TRIAGE_PRESETS,
   MAP_WAVES,
+  type MapTriagePreset,
   REGION_CONNECTIONS,
   REGION_EDGES,
   REGION_POSITIONS,
   REGION_SYSTEM_POSITIONS,
   REGION_SYSTEMS,
-  type MapTriagePreset,
 } from '../../data/map';
 import { MAJOR_STRUCTURES } from '../../data/timers';
+import {
+  translateRegion,
+  translateState,
+  translateStatus,
+  translateStructure,
+  translateSystem,
+} from '../../i18n';
 import type { Timer } from '../../types/timer';
-import { eveTimeContext, localTimeLabel, localTimeZoneLabel, timerDateTime } from '../../utils/timer-utils';
+import {
+  eveTimeContext,
+  localTimeLabel,
+  localTimeZoneLabel,
+  timerDateTime,
+} from '../../utils/timer-utils';
 
 const VISUAL_MAJOR_STRUCTURES = new Set(['Keepstar', 'Sotiyo', 'Fortizar']);
 
@@ -20,6 +33,8 @@ const props = defineProps<{
   timers: Timer[];
   nowMs: number;
 }>();
+
+const { t } = useTranslation();
 
 const REGION_VIEW_WIDTH = 1000;
 const REGION_VIEW_HEIGHT = 760;
@@ -102,10 +117,7 @@ function normalizeRegionId(value: string): string {
 }
 
 function normalizeSystemId(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
+  return value.toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
 const regionAliasMap = computed(() => {
@@ -169,11 +181,19 @@ function resolveSystemName(region: string, raw: string): string {
 function passesPreset(timer: Timer, preset: MapTriagePreset): boolean {
   switch (preset) {
     case 'friendlySov':
-      return timer.status === 'Friendly' && (timer.structure === 'IHub' || timer.structure === 'TCU');
+      return (
+        timer.status === 'Friendly' &&
+        (timer.structure === 'IHub' || timer.structure === 'TCU')
+      );
     case 'friendlyMajors':
-      return timer.status === 'Friendly' && MAJOR_STRUCTURES.includes(timer.structure);
+      return (
+        timer.status === 'Friendly' &&
+        MAJOR_STRUCTURES.includes(timer.structure)
+      );
     case 'hostileMajors':
-      return timer.status === 'Hostile' && MAJOR_STRUCTURES.includes(timer.structure);
+      return (
+        timer.status === 'Hostile' && MAJOR_STRUCTURES.includes(timer.structure)
+      );
     case 'keepstars':
       return timer.structure === 'Keepstar';
     default:
@@ -182,11 +202,18 @@ function passesPreset(timer: Timer, preset: MapTriagePreset): boolean {
 }
 
 function waveMetaFromMs(ms: number) {
-  return MAP_WAVES.find((wave) => ms <= wave.maxMs) ?? MAP_WAVES[MAP_WAVES.length - 1];
+  return (
+    MAP_WAVES.find((wave) => ms <= wave.maxMs) ??
+    MAP_WAVES[MAP_WAVES.length - 1]
+  );
 }
 
 const triageTimers = computed(() => {
-  return props.timers.filter((timer) => timerDateTime(timer).getTime() > props.nowMs && passesPreset(timer, triagePreset.value));
+  return props.timers.filter(
+    (timer) =>
+      timerDateTime(timer).getTime() > props.nowMs &&
+      passesPreset(timer, triagePreset.value),
+  );
 });
 
 const byRegion = computed(() => {
@@ -218,9 +245,14 @@ const byRegion = computed(() => {
     data[region].total += 1;
     if (timer.status === 'Hostile') data[region].hostile += 1;
     else data[region].friendly += 1;
-    if (VISUAL_MAJOR_STRUCTURES.has(timer.structure)) data[region].hasMajor = true;
+    if (VISUAL_MAJOR_STRUCTURES.has(timer.structure))
+      data[region].hasMajor = true;
 
-    if (!data[region].next || timerDateTime(timer).getTime() < timerDateTime(data[region].next).getTime()) {
+    if (
+      !data[region].next ||
+      timerDateTime(timer).getTime() <
+        timerDateTime(data[region].next).getTime()
+    ) {
       data[region].next = timer;
     }
   }
@@ -234,7 +266,9 @@ const byRegion = computed(() => {
     data[region] = details;
   }
 
-  return Object.entries(data).sort((a, b) => b[1].total - a[1].total || a[0].localeCompare(b[0]));
+  return Object.entries(data).sort(
+    (a, b) => b[1].total - a[1].total || a[0].localeCompare(b[0]),
+  );
 });
 
 const byRegionMap = computed(() => Object.fromEntries(byRegion.value));
@@ -242,7 +276,15 @@ const topRegions = computed(() => byRegion.value.slice(0, 15));
 
 function hexToRgb(hex: string) {
   const h = hex.replace('#', '');
-  const bigint = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16);
+  const bigint = parseInt(
+    h.length === 3
+      ? h
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : h,
+    16,
+  );
   return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
 }
 
@@ -262,9 +304,19 @@ function isLightColor(hexOrRgb: string) {
 }
 
 const actionGroups = computed(() => {
-  const groups: Record<string, Array<{ system: string; region: string; timers: Timer[]; earliestMs: number }>> = {};
+  const groups: Record<
+    string,
+    Array<{
+      system: string;
+      region: string;
+      timers: Timer[];
+      earliestMs: number;
+    }>
+  > = {};
   const source = selectedRegion.value
-    ? triageTimers.value.filter((timer) => timerRegion(timer) === selectedRegion.value)
+    ? triageTimers.value.filter(
+        (timer) => timerRegion(timer) === selectedRegion.value,
+      )
     : triageTimers.value;
 
   for (const timer of source) {
@@ -272,10 +324,15 @@ const actionGroups = computed(() => {
     const system = resolveSystemName(region, timer.system);
     const wave = waveMetaFromMs(timerDateTime(timer).getTime() - props.nowMs);
     if (!groups[wave.id]) groups[wave.id] = [];
-    const existing = groups[wave.id].find((item) => item.system === system && item.region === region);
+    const existing = groups[wave.id].find(
+      (item) => item.system === system && item.region === region,
+    );
     if (existing) {
       existing.timers.push(timer);
-      existing.earliestMs = Math.min(existing.earliestMs, timerDateTime(timer).getTime());
+      existing.earliestMs = Math.min(
+        existing.earliestMs,
+        timerDateTime(timer).getTime(),
+      );
     } else {
       groups[wave.id].push({
         system,
@@ -288,14 +345,22 @@ const actionGroups = computed(() => {
 
   return MAP_WAVES.map((wave) => ({
     wave,
-    items: (groups[wave.id] ?? []).sort((a, b) => a.earliestMs - b.earliestMs || b.timers.length - a.timers.length),
+    items: (groups[wave.id] ?? []).sort(
+      (a, b) =>
+        a.earliestMs - b.earliestMs || b.timers.length - a.timers.length,
+    ),
   })).filter((group) => group.items.length > 0);
 });
 
 const regionTopology = computed(() => {
   const region = selectedRegion.value;
   if (!region) {
-    return { region: null, systems: [] as string[], edges: [] as Array<[string, string]>, positions: {} as Record<string, [number, number]> };
+    return {
+      region: null,
+      systems: [] as string[],
+      edges: [] as Array<[string, string]>,
+      positions: {} as Record<string, [number, number]>,
+    };
   }
 
   const knownSystems = REGION_SYSTEMS[region] ?? [];
@@ -309,12 +374,20 @@ const regionTopology = computed(() => {
     ),
   );
 
-  const systems = Array.from(new Set([...knownSystems, ...generatedSystems, ...timerSystems])).sort((a, b) => a.localeCompare(b));
+  const systems = Array.from(
+    new Set([...knownSystems, ...generatedSystems, ...timerSystems]),
+  ).sort((a, b) => a.localeCompare(b));
 
   const edgeSource = REGION_EDGES[region] ?? [];
   const edgeSet = new Set(systems);
   const edges = edgeSource
-    .map(([a, b]) => [resolveSystemName(region, a), resolveSystemName(region, b)] as [string, string])
+    .map(
+      ([a, b]) =>
+        [resolveSystemName(region, a), resolveSystemName(region, b)] as [
+          string,
+          string,
+        ],
+    )
     .filter(([a, b]) => edgeSet.has(a) && edgeSet.has(b));
 
   const positions: Record<string, [number, number]> = { ...generatedPositions };
@@ -322,15 +395,29 @@ const regionTopology = computed(() => {
   const missingSystems = systems.filter((system) => !positions[system]);
   if (missingSystems.length) {
     const existing = Object.values(positions);
-    const cx = existing.length ? Math.round(existing.reduce((acc, pos) => acc + pos[0], 0) / existing.length) : 500;
-    const cy = existing.length ? Math.round(existing.reduce((acc, pos) => acc + pos[1], 0) / existing.length) : 360;
+    const cx = existing.length
+      ? Math.round(
+          existing.reduce((acc, pos) => acc + pos[0], 0) / existing.length,
+        )
+      : 500;
+    const cy = existing.length
+      ? Math.round(
+          existing.reduce((acc, pos) => acc + pos[1], 0) / existing.length,
+        )
+      : 360;
     const ringWidth = 90;
-    const rings = Math.max(1, Math.ceil(Math.sqrt(Math.max(1, missingSystems.length)) / 2));
+    const rings = Math.max(
+      1,
+      Math.ceil(Math.sqrt(Math.max(1, missingSystems.length)) / 2),
+    );
 
     missingSystems.forEach((system, index) => {
       const ringIndex = index % rings;
       const sector = Math.floor(index / rings);
-      const angle = (sector / Math.max(1, Math.ceil(missingSystems.length / rings))) * Math.PI * 2;
+      const angle =
+        (sector / Math.max(1, Math.ceil(missingSystems.length / rings))) *
+        Math.PI *
+        2;
       const radius = 120 + ringIndex * ringWidth;
       const x = Math.round(cx + Math.cos(angle) * radius);
       const y = Math.round(cy + Math.sin(angle) * radius * 0.72);
@@ -340,7 +427,7 @@ const regionTopology = computed(() => {
 
   const displayPositions: Record<string, [number, number]> = {};
   for (const [system, pos] of Object.entries(positions)) {
-    displayPositions[system] = [pos[0], REGION_VIEW_HEIGHT - pos[1]];
+    
   }
 
   return { region, systems, edges, positions: displayPositions };
@@ -349,7 +436,11 @@ const regionTopology = computed(() => {
 function systemTimers(system: string): Timer[] {
   const region = selectedRegion.value;
   if (!region) return [];
-  return triageTimers.value.filter((timer) => timerRegion(timer) === region && resolveSystemName(region, timer.system) === system);
+  return triageTimers.value.filter(
+    (timer) =>
+      timerRegion(timer) === region &&
+      resolveSystemName(region, timer.system) === system,
+  );
 }
 
 function systemNodeColor(system: string): string {
@@ -388,11 +479,13 @@ function systemPrimaryStructure(system: string): string {
 }
 
 function systemHasMajor(system: string): boolean {
-  return systemTimers(system).some((timer) => VISUAL_MAJOR_STRUCTURES.has(timer.structure));
+  return systemTimers(system).some((timer) =>
+    VISUAL_MAJOR_STRUCTURES.has(timer.structure),
+  );
 }
 
 function tooltipCountdown(ms: number): string {
-  if (ms <= 0) return 'elapsed';
+  if (ms <= 0) return '';
   const totalMinutes = Math.max(1, Math.round(ms / 60000));
   const days = Math.floor(totalMinutes / 1440);
   const hours = Math.floor((totalMinutes % 1440) / 60);
@@ -480,7 +573,7 @@ function onRegionHover(region: string, event: MouseEvent) {
       };
     });
 
-  showMapTooltip(region, rows, event);
+  showMapTooltip(translateRegion(region), rows, event);
 }
 
 function onSystemHover(system: string, event: MouseEvent) {
@@ -502,7 +595,7 @@ function onSystemHover(system: string, event: MouseEvent) {
       };
     });
 
-  showMapTooltip(system, rows, event);
+  showMapTooltip(translateSystem(system), rows, event);
 }
 
 function onUniverseRegionClick(region: string, event: MouseEvent) {
@@ -518,10 +611,22 @@ function onUniverseRegionClick(region: string, event: MouseEvent) {
 function regionRadius(region: string): number {
   const total = byRegionMap.value[region]?.total ?? 0;
   if (!total) return 8;
-  return Math.max(REGION_MIN_RADIUS, Math.min(REGION_MAX_RADIUS, REGION_BASE_RADIUS + total * REGION_RADIUS_SCALE));
+  return Math.max(
+    REGION_MIN_RADIUS,
+    Math.min(
+      REGION_MAX_RADIUS,
+      REGION_BASE_RADIUS + total * REGION_RADIUS_SCALE,
+    ),
+  );
 }
 
-function hostileWedgePath(x: number, y: number, r: number, hostile: number, total: number): string {
+function hostileWedgePath(
+  x: number,
+  y: number,
+  r: number,
+  hostile: number,
+  total: number,
+): string {
   if (!hostile || !total) return '';
   const frac = hostile / total;
   if (frac <= 0) return '';
@@ -583,7 +688,13 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function applyZoom(current: number, delta: number, step = ZOOM_STEP, min = ZOOM_MIN, max = ZOOM_MAX) {
+function applyZoom(
+  current: number,
+  delta: number,
+  step = ZOOM_STEP,
+  min = ZOOM_MIN,
+  max = ZOOM_MAX,
+) {
   const factor = Math.sign(delta) * step;
   const next = current * (1 - factor);
   const clamped = clamp(next, min, max);
@@ -659,7 +770,8 @@ function startPinch(e: TouchEvent, target: 'universe' | 'region') {
   twoFingerPan.lastCenterY = center.y;
   pinchState.active = false;
   pinchState.startDist = getTouchDistance(a, b);
-  pinchState.startScale = target === 'universe' ? universeScale.value : regionScale.value;
+  pinchState.startScale =
+    target === 'universe' ? universeScale.value : regionScale.value;
   pinchState.centerX = center.x;
   pinchState.centerY = center.y;
 }
@@ -670,7 +782,8 @@ function movePinch(e: TouchEvent, target: 'universe' | 'region') {
   const dist = getTouchDistance(a, b);
 
   // determine if gesture is a pinch (scale change) or two-finger pan (center movement)
-  const scaleDelta = Math.abs(dist - pinchState.startDist) / (pinchState.startDist || 1);
+  const scaleDelta =
+    Math.abs(dist - pinchState.startDist) / (pinchState.startDist || 1);
   const center = getTouchCenter(a, b);
 
   // threshold: if scale changed more than 5% treat as pinch
@@ -682,8 +795,14 @@ function movePinch(e: TouchEvent, target: 'universe' | 'region') {
   if (pinchState.active) {
     if (!pinchState.startDist) return;
     const scaleFactor = dist / pinchState.startDist;
-    const nextScale = clamp(pinchState.startScale * scaleFactor, ZOOM_MIN, ZOOM_MAX);
-    const svg = (e.currentTarget as Element).closest('svg') as SVGElement | null;
+    const nextScale = clamp(
+      pinchState.startScale * scaleFactor,
+      ZOOM_MIN,
+      ZOOM_MAX,
+    );
+    const svg = (e.currentTarget as Element).closest(
+      'svg',
+    ) as SVGElement | null;
     const rect = svg?.getBoundingClientRect();
     const clientX = rect ? pinchState.centerX - rect.left : pinchState.centerX;
     const clientY = rect ? pinchState.centerY - rect.top : pinchState.centerY;
@@ -717,7 +836,10 @@ function movePinch(e: TouchEvent, target: 'universe' | 'region') {
     twoFingerPan.lastCenterY = center.y;
 
     if (target === 'universe') {
-      const next = clampUniversePan(universePanX.value + dx, universePanY.value + dy);
+      const next = clampUniversePan(
+        universePanX.value + dx,
+        universePanY.value + dy,
+      );
       universePanX.value = next.x;
       universePanY.value = next.y;
     } else {
@@ -810,26 +932,38 @@ const universePanBounds = computed(() => {
 });
 
 const universeRegionLinks = computed(() => {
-  return REGION_CONNECTIONS
-    .map(([a, b]) => {
-      const from = REGION_POSITIONS[a];
-      const to = REGION_POSITIONS[b];
-      if (!from || !to) return null;
-      // const activeA = Boolean(byRegionMap.value[a]);
-      // const activeB = Boolean(byRegionMap.value[b]);
-      return {
-        key: `${a}__${b}`,
-        x1: from[0],
-        y1: from[1],
-        x2: to[0],
-        y2: to[1],
-        // active: activeA || activeB,
-      };
-    })
-    .filter((edge): edge is { key: string; x1: number; y1: number; x2: number; y2: number; active: boolean } => Boolean(edge));
+  return REGION_CONNECTIONS.map(([a, b]) => {
+    const from = REGION_POSITIONS[a];
+    const to = REGION_POSITIONS[b];
+    if (!from || !to) return null;
+    // const activeA = Boolean(byRegionMap.value[a]);
+    // const activeB = Boolean(byRegionMap.value[b]);
+    return {
+      key: `${a}__${b}`,
+      x1: from[0],
+      y1: from[1],
+      x2: to[0],
+      y2: to[1],
+      // active: activeA || activeB,
+    };
+  }).filter(
+    (
+      edge,
+    ): edge is {
+      key: string;
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      active: boolean;
+    } => Boolean(edge),
+  );
 });
 
-function clampUniversePan(nextX: number, nextY: number): { x: number; y: number } {
+function clampUniversePan(
+  nextX: number,
+  nextY: number,
+): { x: number; y: number } {
   const bounds = universePanBounds.value;
   return {
     x: clamp(nextX, bounds.minX, bounds.maxX),
@@ -929,7 +1063,7 @@ watch(universePanBounds, () => {
 <template>
   <div class="view-map active-view">
     <div class="map-triage-bar">
-      <span class="map-triage-label">Triage</span>
+      <span class="map-triage-label">{{ t('map.triage') }}</span>
       <select v-model="triagePreset" class="map-triage-select">
         <option v-for="(label, key) in MAP_TRIAGE_PRESETS" :key="key" :value="key">
           {{ label }}
@@ -939,12 +1073,12 @@ watch(universePanBounds, () => {
 
     <div class="summary-head">
       <div>
-        <div class="summary-title">Regional pressure map</div>
-        <div class="summary-subtitle">Wave-colored regions and system drilldown for active triage.</div>
+        <div class="summary-title">{{ t('map.title') }}</div>
+        <div class="summary-subtitle">{{ t('map.subtitle') }}</div>
       </div>
     </div>
 
-    <div v-if="!byRegion.length" class="summary-empty">No upcoming timers available for this triage preset.</div>
+    <div v-if="!byRegion.length" class="summary-empty">{{ t('map.empty') }}</div>
 
     <div class="map-wrap" v-else>
       <div class="map-svg-wrap">
@@ -967,12 +1101,12 @@ watch(universePanBounds, () => {
           <div class="map-legend-item" v-for="wave in MAP_WAVES" :key="wave.id">
             <span class="map-wave-dot" :class="wave.cls" /> {{ wave.label }}
           </div>
-          <div class="map-legend-item"><span class="map-legend-dot" style="background: var(--border-mid)" /> No active timers</div>
+          <div class="map-legend-item"><span class="map-legend-dot" style="background: var(--border-mid)" /> {{ t('map.noActiveTimers') }}</div>
           <div class="map-legend-item">
             <span style="width: 7px; height: 7px; border-radius: 50%; background: #ff4d5d; border: 1px solid rgba(0, 0, 0, 0.55); display: inline-block" />
-            Keepstar/Sotiyo/Fortizar
+            {{ t('map.majorStructures') }}
           </div>
-          <span style="color: var(--text-3); font-size: 10px">· Circle size = timer count · Dark wedge = hostile fraction · Click region for detail</span>
+          <span style="color: var(--text-3); font-size: 10px">{{ t('map.legendHint') }}</span>
         </div>
 
         <svg
@@ -1073,7 +1207,7 @@ watch(universePanBounds, () => {
               pointer-events="none"
             >
               <!-- {{ shortRegionName(region) }} -->
-                {{ region }}
+                {{ translateRegion(region) }}
             </text>
             </g>
           </g>
@@ -1098,7 +1232,7 @@ watch(universePanBounds, () => {
           @dblclick="resetRegionPan"
         >
           <text x="500" y="26" text-anchor="middle" fill="var(--text-2)" font-size="13" font-weight="700">
-            {{ selectedRegion }}
+            {{ translateRegion(selectedRegion) }}
           </text>
 
           <g :transform="`translate(${panX} ${panY}) scale(${regionScale})`">
@@ -1156,7 +1290,7 @@ watch(universePanBounds, () => {
                 font-size="8"
                 pointer-events="none"
               >
-                {{ system }}
+                {{ translateSystem(system) }}
               </text>
             </g>
           </g>
@@ -1168,7 +1302,7 @@ watch(universePanBounds, () => {
 
         <div class="map-region-card universe-card" @click="returnToUniverse"
           :class="{active: selectedRegion === null}">
-          <div class="map-rc-name">Universe</div>
+          <div class="map-rc-name">{{ t('map.universe') }}</div>
         </div>
 
         <div
@@ -1179,38 +1313,38 @@ watch(universePanBounds, () => {
           @click="selectedRegion = region"
         >
           <div class="map-rc-name">
-            {{ region }}
-            <span style="font-size: 9px; font-weight: 400; color: var(--text-3)">{{ data.total }} timer{{ data.total === 1 ? '' : 's' }}</span>
+            {{ translateRegion(region) }}
+            <span style="font-size: 9px; font-weight: 400; color: var(--text-3)">{{ t(data.total === 1 ? 'map.timerCount' : 'map.timersCount', { count: data.total }) }}</span>
           </div>
           <div class="map-rc-bars">
             <div v-if="data.hostile" class="map-rc-bar hostile" :style="{ width: `${Math.round((data.hostile / data.total) * 80)}px` }" />
             <div v-if="data.friendly" class="map-rc-bar friendly" :style="{ width: `${Math.round((data.friendly / data.total) * 80)}px` }" />
-            <span class="map-rc-nums">{{ data.hostile }}H · {{ data.friendly }}F</span>
+            <span class="map-rc-nums">{{ t('map.hostileFriendlyShort', { hostile: data.hostile, friendly: data.friendly }) }}</span>
           </div>
         </div>
 
         <div class="map-actions">
-          <div class="map-actions-title">Next actions</div>
-          <div v-if="!actionGroups.length" class="map-actions-empty">No upcoming timers for this triage preset.</div>
+          <div class="map-actions-title">{{ t('map.nextActions') }}</div>
+          <div v-if="!actionGroups.length" class="map-actions-empty">{{ t('map.emptyActions') }}</div>
           <div v-for="group in actionGroups" :key="group.wave.id" class="map-wave-group">
             <div class="map-wave-head"><span class="map-wave-dot" :class="group.wave.cls" />{{ group.wave.label }}</div>
             <div v-for="item in group.items.slice(0, 10)" :key="`${item.region}-${item.system}`" class="map-action-row">
               <div class="map-action-main">
-                <div class="map-action-sys" :title="selectedRegion ? item.system : `${item.system} < ${item.region}`">
-                  {{ selectedRegion ? item.system : `${item.system} < ${item.region}` }}
+                <div class="map-action-sys" :title="selectedRegion ? translateSystem(item.system) : t('map.systemInRegion', { system: translateSystem(item.system), region: translateRegion(item.region) })">
+                  {{ selectedRegion ? translateSystem(item.system) : t('map.systemInRegion', { system: translateSystem(item.system), region: translateRegion(item.region) }) }}
                 </div>
                 <div class="map-action-meta" :title="item.timers[0]?.structure">
-                  {{ item.timers[0]?.structure }}
+                  {{ translateStructure(item.timers[0]?.structure) }}
                 </div>
               </div>
               <div>
                 <div style="display:flex;align-items:center;gap:8px;">
-                  <span class="status-dot" :class="item.timers[0]?.status === 'Friendly' ? 'ours' : 'theirs'" :title="item.timers[0]?.owner ? `${item.timers[0].status} — ${item.timers[0].owner}` : item.timers[0]?.status" />
+                  <span class="status-dot" :class="item.timers[0]?.status === 'Friendly' ? 'ours' : 'theirs'" :title="item.timers[0]?.owner ? `${translateStatus(item.timers[0].status)} - ${item.timers[0].owner}` : translateStatus(item.timers[0]?.status)" />
                   <div class="map-action-time">
-                    {{ item.timers[0] ? `${localTimeLabel(item.timers[0])} ${localTimeZoneLabel(item.timers[0])}` : '' }} � {{ tooltipCountdown(item.earliestMs - props.nowMs) }}
+                    {{ item.timers[0] ? `${localTimeLabel(item.timers[0])} ${localTimeZoneLabel(item.timers[0])}` : '' }} · {{ tooltipCountdown(item.earliestMs - props.nowMs) }}
                   </div>
                 </div>
-                <div class="map-action-count">{{ item.timers[0] ? eveTimeContext(item.timers[0]) : '' }} � {{ item.timers.length }} timers</div>
+                <div class="map-action-count">{{ item.timers[0] ? eveTimeContext(item.timers[0]) : '' }} · {{ t(item.timers.length === 1 ? 'map.timerCount' : 'map.timersCount', { count: item.timers.length }) }}</div>
               </div>
             </div>
           </div>
@@ -1225,13 +1359,13 @@ watch(universePanBounds, () => {
       >
         <div class="mst-sys">{{ mapTooltip.title }}</div>
         <div v-if="!mapTooltip.rows.length" class="mst-row">
-          <span>No active timers</span>
+          <span>{{ t('map.noActiveTimers') }}</span>
         </div>
         <div v-for="row in mapTooltip.rows" :key="row.id" class="mst-row">
-          <span class="mst-dot" :class="row.status === 'Hostile' ? 'hostile' : 'friendly'" :title="row.status" />
+          <span class="mst-dot" :class="row.status === 'Hostile' ? 'hostile' : 'friendly'" :title="translateStatus(row.status)" />
           <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;">
             <span class="mst-name" style="font-weight:700;">{{ row.name }}<span v-if="row.owner"> ({{ row.owner }})</span></span>
-            <span class="mst-struct" style="font-size:12px;color:var(--text-3);">{{ row.structure }} · {{ row.state }}</span>
+            <span class="mst-struct" style="font-size:12px;color:var(--text-3);">{{ translateStructure(row.structure) }} · {{ translateState(row.state) }}</span>
           </div>
           <span class="mst-cd" :class="row.countdownCls">{{ row.countdown }}</span>
         </div>
@@ -1638,3 +1772,4 @@ watch(universePanBounds, () => {
   }
 }
 </style>
+
