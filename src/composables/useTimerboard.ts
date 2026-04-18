@@ -137,8 +137,11 @@ export const useTimerboard = defineStore('timerboard', () => {
     }
     // Deduplicate by system|name|structure|state — keep the earliest timer (by date+time)
     const deduped = new Map<string, Partial<Timer>>();
+    const normalizeKey = (s: unknown) =>
+      (typeof s === 'string' ? s : String(s ?? '')).toLowerCase().replace(/\s+/g, ' ').trim();
+
     for (const item of mapped) {
-      const key = `${item.system || ''}|${item.name || ''}|${item.structure || ''}|${item.state || ''}`;
+      const key = `${normalizeKey(item.system)}|${normalizeKey(item.name)}|${normalizeKey(item.structure)}|${normalizeKey(item.state)}`;
       const existing = deduped.get(key);
       if (!existing) {
         deduped.set(key, item);
