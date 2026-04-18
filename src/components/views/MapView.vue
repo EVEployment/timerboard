@@ -240,6 +240,27 @@ const byRegion = computed(() => {
 const byRegionMap = computed(() => Object.fromEntries(byRegion.value));
 const topRegions = computed(() => byRegion.value.slice(0, 15));
 
+function hexToRgb(hex: string) {
+  const h = hex.replace('#', '');
+  const bigint = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16);
+  return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+}
+
+function isLightColor(hexOrRgb: string) {
+  try {
+    const c = hexOrRgb.trim();
+    const rgb = c.startsWith('#') ? hexToRgb(c) : null;
+    const r = rgb ? rgb.r : 0;
+    const g = rgb ? rgb.g : 0;
+    const b = rgb ? rgb.b : 0;
+    // Perceived luminance
+    const lum = 0.2126 * (r / 255) + 0.7152 * (g / 255) + 0.0722 * (b / 255);
+    return lum > 0.6;
+  } catch {
+    return false;
+  }
+}
+
 const actionGroups = computed(() => {
   const groups: Record<string, Array<{ system: string; region: string; timers: Timer[]; earliestMs: number }>> = {};
   const source = selectedRegion.value
@@ -1000,7 +1021,16 @@ watch(universePanBounds, () => {
               pointer-events="none"
             />
 
-            <text v-if="byRegionMap[region]" :x="pos[0]" :y="pos[1] + 1" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="10" font-weight="700">
+            <text
+              v-if="byRegionMap[region]"
+              :x="pos[0]"
+              :y="pos[1] + 1"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              :fill="isLightColor(byRegionMap[region].waveColor) ? 'rgba(0,0,0,0.9)' : '#fff'"
+              font-size="10"
+              font-weight="700"
+            >
               {{ byRegionMap[region].total }}
             </text>
 
