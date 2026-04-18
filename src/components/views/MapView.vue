@@ -1122,9 +1122,10 @@ watch(universePanBounds, () => {
                 :x="regionTopology.positions[system]?.[0] ?? 0"
                 :y="(regionTopology.positions[system]?.[1] ?? 0) + 3"
                 text-anchor="middle"
-                fill="#fff"
+                :fill="isLightColor(systemNodeColor(system)) ? 'rgba(0,0,0,0.9)' : '#fff'"
                 font-size="11"
                 font-weight="700"
+                pointer-events="none"
               >
                 {{ systemTimers(system).length ? systemTimers(system).length : '' }}
               </text>
@@ -1132,8 +1133,9 @@ watch(universePanBounds, () => {
                 :x="regionTopology.positions[system]?.[0] ?? 0"
                 :y="(regionTopology.positions[system]?.[1] ?? 0) + systemRadius(system) + 10"
                 text-anchor="middle"
-                fill="var(--text-3)"
+                :fill="isLightColor(systemNodeColor(system)) ? 'rgba(0,0,0,0.9)' : 'var(--text-3)'"
                 font-size="8"
+                pointer-events="none"
               >
                 {{ system }}
               </text>
