@@ -16,11 +16,6 @@ const emit = defineEmits<{
   clearRegions: [];
   clearStructures: [];
 }>();
-
-void t;
-void translateState;
-void translateStatus;
-void emit;
 </script>
 
 <template>

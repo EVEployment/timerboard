@@ -3,7 +3,13 @@ import {
   SYSTEM_REGION_LOOKUP,
   VISUAL_MAJOR_STRUCTURES,
 } from '../data/timers';
-import i18next from '../i18n';
+import {
+  REGION_POSITIONS,
+  REGION_SYSTEMS,
+  REGION_SYSTEM_POSITIONS,
+  REGION_EDGES,
+} from '../data/map';
+import i18next, { resolveRegionName as resolveRegionNameFromI18n } from '../i18n';
 import type { Timer } from '../types/timer';
 
 const TIMER_TEXT_LIMITS = {
@@ -281,6 +287,37 @@ export function normalizeTimerState(value: unknown): string {
     : 'Hull';
 }
 
+export function normalizeRegionId(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+export function normalizeSystemId(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+const regionAliasMap: Record<string, string> = Object.fromEntries(
+  [
+    ...Object.keys(REGION_POSITIONS),
+    ...Object.keys(REGION_SYSTEMS),
+    ...Object.keys(REGION_SYSTEM_POSITIONS),
+    ...Object.keys(REGION_EDGES),
+    'Unknown',
+  ]
+    .filter(Boolean)
+    .map((k) => [normalizeRegionId(k), k]),
+);
+
+// Common Discord/import variant.
+regionAliasMap[normalizeRegionId('Vale Of The Silent')] = 'Vale of the Silent';
+
+// Use resolveRegionName from i18n module
+export function resolveRegionName(raw: string): string {
+  return resolveRegionNameFromI18n(raw);
+}
+
 function normalizeTimerStatus(value: unknown): 'Friendly' | 'Hostile' {
   return String(value ?? '').trim() === 'Friendly' ? 'Friendly' : 'Hostile';
 }
@@ -305,8 +342,8 @@ export function sanitizeTimer(raw: Partial<Timer>): Timer | null {
     date,
     time,
     system,
-    region: normalizeRegionName(
-      cleanText(raw.region, TIMER_TEXT_LIMITS.region),
+    region: resolveRegionName(
+      normalizeRegionName(cleanText(raw.region, TIMER_TEXT_LIMITS.region)),
     ),
     name: cleanText(raw.name || '--', TIMER_TEXT_LIMITS.name) || '--',
     structure: normalizeStructureName(

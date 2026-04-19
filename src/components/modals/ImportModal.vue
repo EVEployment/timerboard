@@ -21,10 +21,6 @@ const emit = defineEmits<{
 function onInput(event: Event) {
   emit('updateModelValue', (event.target as HTMLTextAreaElement).value);
 }
-
-void props;
-void t;
-void onInput;
 </script>
 
 <template>

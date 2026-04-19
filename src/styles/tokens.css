@@ -1,6 +1,13 @@
 /* ── DARK THEME (default) ── */
 :root {
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: 
+    "PingFang SC",        /* macOS/iOS Simplified Chinese */
+    "PingFang TC",        /* macOS/iOS Traditional Chinese */
+    "Microsoft YaHei",    /* Windows Simplified Chinese */
+    "Microsoft JhengHei", /* Windows Traditional Chinese */
+    "Noto Sans SC",       /* Linux / Android fallback */
+    "Source Han Sans SC", /* Adobe open source */
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "Cascadia Mono", "Consolas", "Liberation Mono", monospace;
   --bg:         #111418;
   --bg-surface: #181c22;

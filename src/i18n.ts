@@ -4,6 +4,12 @@ import en from './locales/en.json';
 import zh from './locales/zh.json';
 import sdeEn from './sde/sde.en.json';
 import sdeZh from './sde/sde.zh.json';
+import {
+  REGION_POSITIONS,
+  REGION_SYSTEMS,
+  REGION_SYSTEM_POSITIONS,
+  REGION_EDGES,
+} from './data/map';
 
 export const SUPPORTED_LANGUAGES = ['en', 'zh'] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
@@ -62,6 +68,27 @@ export function translateSystem(value: string | undefined): string {
 
 export function translateStructure(value: string | undefined): string {
   return translateSde('structure', value);
+}
+
+function normalizeRegionId(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+const regionAliasMap: Record<string, string> = Object.fromEntries(
+  [
+    ...Object.keys(REGION_POSITIONS),
+    ...Object.keys(REGION_SYSTEMS),
+    ...Object.keys(REGION_SYSTEM_POSITIONS),
+    ...Object.keys(REGION_EDGES),
+    'Unknown',
+  ]
+    .filter(Boolean)
+    .map((k) => [normalizeRegionId(k), k]),
+);
+regionAliasMap[normalizeRegionId('Vale Of The Silent')] = 'Vale of the Silent';
+
+export function resolveRegionName(raw: string): string {
+  return regionAliasMap[normalizeRegionId(raw)] ?? raw;
 }
 
 export function translateState(value: string | undefined): string {

@@ -221,7 +221,7 @@ void onLanguageChange;
 }
 
 .view-btn {
-  font-size: 13px;
+  font-size: 14px;
   position: relative;
   padding-left: 12px;
 }
@@ -249,7 +249,7 @@ void onLanguageChange;
   background: var(--bg-surface);
   color: var(--text-2);
   font: inherit;
-  font-size: 11px;
+  font-size: 14px;
   padding: 3px 7px;
 }
 

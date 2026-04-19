@@ -50,13 +50,6 @@ function blockLabel(start: number): string {
   return localBlockLabel(start);
 }
 
-function summaryPlural(
-  count: number,
-  singularKey: string,
-  pluralKey: string,
-): string {
-  return `${count} ${t(count === 1 ? singularKey : pluralKey)}`;
-}
 
 function isSummaryCoreTimer(timer: Timer): boolean {
   return SUMMARY_CORE_STRUCTURES.has(timer.structure);
@@ -200,9 +193,9 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
         <div class="summary-subtitle">{{ t('summary.subtitle') }}</div>
       </div>
       <div class="summary-meta">
-        <span class="summary-chip">{{ summaryPlural(summaryMeta.keyTimers, 'summary.keyTimer', 'summary.keyTimers') }}</span>
-        <span class="summary-chip">{{ summaryPlural(summaryMeta.blocks, 'common.timeBlock', 'common.timeBlocks') }}</span>
-        <span class="summary-chip">{{ summaryPlural(summaryMeta.regions, 'common.region', 'common.regions') }}</span>
+        <span class="summary-chip">{{ t('summary.keyTimers', { count: summaryMeta.keyTimers }) }}</span>
+        <span class="summary-chip">{{ t('summary.timeBlock', { count: summaryMeta.blocks }) }}</span>
+        <span class="summary-chip">{{ t('summary.region', { count: summaryMeta.regions }) }}</span>
       </div>
     </div>
 
@@ -285,12 +278,12 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
 }
 
 .summary-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
 }
 
 .summary-subtitle {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-3);
   margin-top: 3px;
   line-height: 1.35;
@@ -309,7 +302,7 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
   border-radius: 3px;
   padding: 5px 8px;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-2);
   white-space: nowrap;
 }
@@ -334,7 +327,7 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
   gap: 8px;
   margin: 0 0 7px;
   color: var(--text-2);
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -401,7 +394,7 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
 
 .summary-window {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--text-1);
   white-space: nowrap;
@@ -409,16 +402,16 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
 
 .summary-kicker {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 13px;
   color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .summary-region {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
-  color: var(--blue);
+  color: var(--text-1);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -434,7 +427,7 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
 }
 
 .summary-priority {
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -484,7 +477,7 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
 
 .summary-count {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--text-2);
   border: 1px solid var(--border);
@@ -506,7 +499,7 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
 }
 
 .summary-lead {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-1);
   line-height: 1.35;
   margin-bottom: 8px;
@@ -521,7 +514,7 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
 }
 
 .summary-struct-chip {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--text-2);
   background: var(--bg);
@@ -540,7 +533,7 @@ const rowsByDate = computed<Record<string, SummaryRow[]>>(() => {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
   line-height: 1.35;
 }

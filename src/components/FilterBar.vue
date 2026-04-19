@@ -142,7 +142,7 @@ function toggleGroup(id: string) {
   border: 1px solid var(--border);
   color: var(--text-2);
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   padding: 4px 9px;
   border-radius: 3px;
@@ -184,7 +184,7 @@ function toggleGroup(id: string) {
 .filter-count {
   color: var(--text-3);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .region-list {
@@ -195,7 +195,7 @@ function toggleGroup(id: string) {
 }
 
 .check-item {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-2);
   display: flex;
   align-items: center;

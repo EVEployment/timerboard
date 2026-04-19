@@ -15,10 +15,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useTranslation();
-
-void formatLocalDayLabel;
-void emit;
-void t;
 </script>
 
 <template>
@@ -53,7 +49,7 @@ void t;
   background: var(--bg-surface);
   border: 1px solid var(--border);
   color: var(--text-2);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   padding: 3px 9px;
   cursor: pointer;

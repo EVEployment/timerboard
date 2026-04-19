@@ -25,6 +25,8 @@ import {
   localTimeLabel,
   localTimeZoneLabel,
   timerDateTime,
+  normalizeRegionId,
+  normalizeSystemId,
 } from '../../utils/timer-utils';
 
 const VISUAL_MAJOR_STRUCTURES = new Set(['Keepstar', 'Sotiyo', 'Fortizar']);
@@ -109,43 +111,9 @@ const mapTooltip = reactive({
   }>,
 });
 
-function normalizeRegionId(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-}
-
-function normalizeSystemId(value: string): string {
-  return value.toLowerCase().replace(/\s+/g, ' ').trim();
-}
-
-const regionAliasMap = computed(() => {
-  const map: Record<string, string> = {};
-  const known = new Set([
-    ...Object.keys(REGION_POSITIONS),
-    ...Object.keys(REGION_SYSTEMS),
-    ...Object.keys(REGION_SYSTEM_POSITIONS),
-    ...Object.keys(REGION_EDGES),
-    'Unknown',
-  ]);
-
-  for (const key of known) {
-    map[normalizeRegionId(key)] = key;
-  }
-
-  // Common Discord/import variant.
-  map[normalizeRegionId('Vale Of The Silent')] = 'Vale of the Silent';
-
-  return map;
-});
-
-function resolveRegionName(raw: string): string {
-  return regionAliasMap.value[normalizeRegionId(raw)] ?? raw;
-}
 
 function timerRegion(timer: Timer): string {
-  return resolveRegionName(timer.region || 'Unknown');
+  return timer.region || 'Unknown';
 }
 
 const systemAliasMapByRegion = computed(() => {
@@ -427,7 +395,9 @@ const regionTopology = computed(() => {
 
   const displayPositions: Record<string, [number, number]> = {};
   for (const [system, pos] of Object.entries(positions)) {
-    
+    // Use resolved system name keys so positions match `systems` which are resolved
+    const resolved = resolveSystemName(region, system);
+    displayPositions[resolved] = pos;
   }
 
   return { region, systems, edges, positions: displayPositions };
@@ -1089,11 +1059,11 @@ watch(universePanBounds, () => {
             :aria-current="selectedRegion ? undefined : 'page'"
             @click="returnToUniverse"
           >
-            Universe
+            {{ t('map.universe') }}
           </button>
           <template v-if="selectedRegion">
             <span class="map-breadcrumb-separator" aria-hidden="true">/</span>
-            <span class="map-breadcrumb-current" aria-current="page">{{ selectedRegion }}</span>
+            <span class="map-breadcrumb-current" aria-current="page">{{ translateRegion(selectedRegion) }}</span>
           </template>
         </nav>
 
@@ -1106,7 +1076,7 @@ watch(universePanBounds, () => {
             <span style="width: 7px; height: 7px; border-radius: 50%; background: #ff4d5d; border: 1px solid rgba(0, 0, 0, 0.55); display: inline-block" />
             {{ t('map.majorStructures') }}
           </div>
-          <span style="color: var(--text-3); font-size: 10px">{{ t('map.legendHint') }}</span>
+          <span style="color: var(--text-3); font-size: 14px">{{ t('map.legendHint') }}</span>
         </div>
 
         <svg
@@ -1231,7 +1201,7 @@ watch(universePanBounds, () => {
           @pointerleave="endRegionDrag"
           @dblclick="resetRegionPan"
         >
-          <text x="500" y="26" text-anchor="middle" fill="var(--text-2)" font-size="13" font-weight="700">
+          <text x="500" y="26" text-anchor="middle" fill="var(--text-2)" font-size="16" font-weight="700">
             {{ translateRegion(selectedRegion) }}
           </text>
 
@@ -1314,7 +1284,7 @@ watch(universePanBounds, () => {
         >
           <div class="map-rc-name">
             {{ translateRegion(region) }}
-            <span style="font-size: 9px; font-weight: 400; color: var(--text-3)">{{ t(data.total === 1 ? 'map.timerCount' : 'map.timersCount', { count: data.total }) }}</span>
+            <span style="font-size: 12px; font-weight: 400; color: var(--text-3)">{{ t('map.timerCount', { count: data.total }) }}</span>
           </div>
           <div class="map-rc-bars">
             <div v-if="data.hostile" class="map-rc-bar hostile" :style="{ width: `${Math.round((data.hostile / data.total) * 80)}px` }" />
@@ -1385,12 +1355,12 @@ watch(universePanBounds, () => {
 }
 
 .summary-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
 }
 
 .summary-subtitle {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-3);
   margin-top: 3px;
 }
@@ -1442,7 +1412,7 @@ watch(universePanBounds, () => {
   color: var(--text-2);
   cursor: pointer;
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   padding: 4px 8px;
   transition: border-color 0.1s, color 0.1s, background 0.1s;
@@ -1466,12 +1436,12 @@ watch(universePanBounds, () => {
 
 .map-breadcrumb-current {
   color: var(--text-1);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .map-sidebar {
-  width: 240px;
+  width: 20rem;
   flex-shrink: 0;
 }
 
@@ -1494,7 +1464,7 @@ watch(universePanBounds, () => {
 }
 
 .map-rc-name {
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-1);
   margin-bottom: 4px;
@@ -1522,7 +1492,7 @@ watch(universePanBounds, () => {
 
 .map-rc-nums {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-3);
   margin-left: 4px;
 }
@@ -1531,7 +1501,7 @@ watch(universePanBounds, () => {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-3);
   margin-bottom: 8px;
   align-items: center;
@@ -1558,7 +1528,7 @@ watch(universePanBounds, () => {
 }
 
 .map-triage-label {
-  font-size: 10px;
+  font-size: 14px;
   color: var(--text-3);
   text-transform: uppercase;
 }
@@ -1569,7 +1539,7 @@ watch(universePanBounds, () => {
   color: var(--text-1);
   border-radius: 3px;
   padding: 4px 8px;
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .map-wave-dot {
@@ -1605,7 +1575,7 @@ watch(universePanBounds, () => {
 }
 
 .map-actions-title {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-1);
   margin-bottom: 8px;
@@ -1617,7 +1587,7 @@ watch(universePanBounds, () => {
 }
 
 .map-wave-group {
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .map-wave-group:first-of-type {
@@ -1628,7 +1598,7 @@ watch(universePanBounds, () => {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-2);
   text-transform: uppercase;
@@ -1642,7 +1612,7 @@ watch(universePanBounds, () => {
   gap: 8px;
   padding: 6px 0;
   border-top: 1px solid var(--border);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .map-action-row:first-of-type {
@@ -1657,7 +1627,7 @@ watch(universePanBounds, () => {
   overflow: hidden;
 }
 
-    .map-action-row {
+.map-action-row {
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--blue);
@@ -1679,7 +1649,6 @@ watch(universePanBounds, () => {
 }
 
 .map-action-meta {
-
     .map-action-row .status-dot {
       width: 12px;
       height: 12px;
@@ -1687,8 +1656,9 @@ watch(universePanBounds, () => {
       display: inline-block;
       margin-right: 6px;
     }
+
   color: var(--text-3);
-  font-size: 10px;
+  font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1704,7 +1674,7 @@ watch(universePanBounds, () => {
 .map-action-count {
   font-family: var(--font-mono);
   color: var(--text-3);
-  font-size: 10px;
+  font-size: 12px;
   text-align: right;
   white-space: nowrap;
 }
@@ -1754,7 +1724,7 @@ watch(universePanBounds, () => {
   opacity: 1;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1439px) {
   .map-wrap {
     flex-direction: column;
   }

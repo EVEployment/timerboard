@@ -6,7 +6,7 @@
   border: 1px solid var(--border);
   color: var(--text-2);
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   padding: 4px 9px;
   cursor: pointer;
@@ -27,7 +27,7 @@
 }
 
 .filter-label {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-3);
   text-transform: uppercase;
   margin-right: 2px;

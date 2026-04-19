@@ -5,8 +5,6 @@ import type { TimerStats } from '../types/timer';
 defineProps<{ stats: TimerStats }>();
 
 const { t } = useTranslation();
-
-void t;
 </script>
 
 <template>

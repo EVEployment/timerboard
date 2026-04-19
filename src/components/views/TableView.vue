@@ -146,7 +146,7 @@ function structureClass(structure: string): string {
 }
 
 .date-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-2);
   text-transform: uppercase;
@@ -190,7 +190,7 @@ function structureClass(structure: string): string {
   background: var(--bg-header);
   border-bottom: 1px solid var(--border-mid);
   padding: 5px 8px;
-  font-size: 12px;
+  font-size: 14px;
   text-transform: uppercase;
   color: var(--text-3);
   text-align: left;

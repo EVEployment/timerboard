@@ -106,7 +106,6 @@
     "subtitle": "Upcoming key timers by local time block, region, structure, side, and state.",
     "empty": "No upcoming key timers match the current filters.",
     "soonestPressure": "soonest pressure",
-    "timeBlock": "time block",
     "systems": "Systems:",
     "states": "States:",
     "first": "First:",
@@ -114,8 +113,12 @@
     "hostileShort": "{{count}}H",
     "friendlyShort": "{{count}}F",
     "more": "+{{count}} more",
-    "keyTimer": "key timer",
-    "keyTimers": "key timers"
+    "keyTimers_one": "{{count}} key timer",
+    "keyTimers_other": "{{count}} key timers",
+    "timeBlock_one": "{{count}} time block",
+    "timeBlock_other": "{{count}} time blocks",
+    "region_one": "{{count}} region",
+    "region_other": "{{count}} regions"
   },
   "map": {
     "triage": "Triage",
@@ -128,8 +131,8 @@
     "universe": "Universe",
     "nextActions": "Next actions",
     "emptyActions": "No upcoming timers for this triage preset.",
-    "timersCount": "{{count}} timers",
-    "timerCount": "{{count}} timer",
+    "timerCount_one": "{{count}} timer",
+    "timerCount_other": "{{count}} timers",
     "hostileFriendlyShort": "{{hostile}}H · {{friendly}}F",
     "systemInRegion": "{{system}} < {{region}}"
   },

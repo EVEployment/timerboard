@@ -172,7 +172,7 @@ function leftForTimer(timer: Timer): number {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 3px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-3);
 }
 
@@ -207,7 +207,7 @@ function leftForTimer(timer: Timer): number {
 .tl-legend-hint {
   margin-left: auto;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .tl-section {
@@ -215,7 +215,7 @@ function leftForTimer(timer: Timer): number {
 }
 
 .tl-section-header {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-2);
   text-transform: uppercase;
@@ -229,7 +229,7 @@ function leftForTimer(timer: Timer): number {
 }
 
 .tl-section-header .dsh-count {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-3);
   font-weight: 400;
   font-family: var(--font-mono);

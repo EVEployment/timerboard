@@ -25,8 +25,9 @@ const STRUCTURE_NAMES = [
 ];
 
 const STRUCTURE_ALIASES = {
-  IHub: 'Infrastructure Hub',
-  TCU: 'Territorial Claim Unit',
+  // IHub: 'Infrastructure Hub',
+  IHub: 'Sovereignty Hub',
+  // TCU: 'Territorial Claim Unit',
   Skyhook: 'Orbital Skyhook',
 };
 
@@ -75,17 +76,25 @@ function canonicalMap(records, category) {
   return out;
 }
 
-function structureMap(typeRecords) {
-  const wanted = new Set([
-    ...STRUCTURE_NAMES,
-    ...Object.values(STRUCTURE_ALIASES),
-  ]);
+function structureMap(typeRecords, groupRecords) {
+  const groupMap = new Map();
+  for (const group of groupRecords) {
+    groupMap.set(Number(group._key), group);
+  }
+  // const wanted = new Set([
+  //   ...STRUCTURE_NAMES,
+  //   ...Object.values(STRUCTURE_ALIASES),
+  // ]);
   const out = Object.fromEntries(
     LANGS.map((lang) => [lang, { region: {}, system: {}, structure: {} }]),
   );
   for (const record of typeRecords) {
+    const group = groupMap.get(Number(record.groupID));
+    if (![40,46,65].includes(Number(group?.categoryID))) {
+      continue;
+    }
     const english = localizedName(record, 'en');
-    if (!wanted.has(english)) continue;
+    // if (!wanted.has(english)) continue;
     for (const lang of LANGS) {
       const translated = localizedName(record, lang);
       if (translated) out[lang].structure[english] = translated;
@@ -121,6 +130,7 @@ async function main() {
   const buffer = Buffer.concat(chunks);
   const entries = await readZipEntries(buffer, [
     'types.jsonl',
+    'groups.jsonl',
     'regions.jsonl',
     'mapregions.jsonl',
     'solarsystems.jsonl',
@@ -129,6 +139,7 @@ async function main() {
   ]);
 
   const types = entries.get('types.jsonl');
+  const groups = entries.get('groups.jsonl');
   const regions =
     entries.get('regions.jsonl') ?? entries.get('mapregions.jsonl');
   const solarSystems =
@@ -144,7 +155,10 @@ async function main() {
   );
   mergeLangData(data, canonicalMap(parseJsonl(regions), 'region'));
   mergeLangData(data, canonicalMap(parseJsonl(solarSystems), 'system'));
-  mergeLangData(data, structureMap(parseJsonl(types)));
+  mergeLangData(
+    data,
+    structureMap(parseJsonl(types), parseJsonl(groups)),
+  );
 
   await fs.mkdir(OUT_DIR, { recursive: true });
   for (const lang of LANGS) {

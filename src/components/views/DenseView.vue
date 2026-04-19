@@ -27,21 +27,6 @@ defineProps<{
 }>();
 
 const { t } = useTranslation();
-
-void countdown;
-void countdownClass;
-void formatLocalDayLabel;
-void isVisualMajor;
-void localTimeLabel;
-void localTimeOfDayClass;
-void localTimeZoneLabel;
-void stateKey;
-void timerDateTime;
-void t;
-void translateState;
-void translateStatus;
-void translateStructure;
-void translateSystem;
 </script>
 
 <template>
@@ -102,7 +87,7 @@ void translateSystem;
 }
 
 .dense-section-header {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-2);
   text-transform: uppercase;
   border-bottom: 1px solid var(--border);
@@ -201,7 +186,7 @@ void translateSystem;
 
 .dense-time {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   color: var(--text-1);
   white-space: nowrap;
@@ -214,7 +199,7 @@ void translateSystem;
 .dense-system {
   font-size: 14px;
   font-weight: 800;
-  color: var(--blue);
+  color: var(--text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -235,8 +220,8 @@ void translateSystem;
   align-items: center;
   border-radius: 999px;
   padding: 3px 8px;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -277,7 +262,7 @@ void translateSystem;
 }
 
 .dense-name {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
   line-height: 1.35;
   display: -webkit-box;
@@ -288,7 +273,7 @@ void translateSystem;
 
 .dense-cd {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-3);
   white-space: nowrap;
 }
