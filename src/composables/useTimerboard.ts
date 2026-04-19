@@ -142,7 +142,11 @@ export const useTimerboard = defineStore('timerboard', () => {
       // Ad-hoc rule: discard Orbital Skyhook entries when item.id === 'Auth'
       const idVal = item?.id ?? '';
       const struct = (mappedItem.structure || '').toLowerCase();
-      if (String(idVal) === 'Auth' && struct.includes('skyhook')) continue;
+      const name = (mappedItem.name || '').toLowerCase();
+      const status = (mappedItem.status || '').toLowerCase();
+      if (String(idVal) === 'Auth' && struct.includes('skyhook') && status === 'friendly') continue;
+      if (String(idVal) === 'TEST' && struct.includes('skyhook')) continue;
+      if (String(idVal) === 'NC' && name.includes('[ihub]')) continue;
       mapped.push(mappedItem);
     }
     // Normalize state values and deduplicate by normalized system|name|structure|state — keep earliest timer
